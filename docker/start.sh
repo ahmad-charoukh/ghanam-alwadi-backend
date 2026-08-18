@@ -2,9 +2,11 @@
 set -e
 
 php artisan package:discover --ansi
+php artisan filament:upgrade
 php artisan migrate --force
 php artisan db:seed --class=ProductionSeeder --force
 php artisan storage:link || true
 php artisan config:cache
+php artisan filament:optimize
 
 exec apache2-foreground
