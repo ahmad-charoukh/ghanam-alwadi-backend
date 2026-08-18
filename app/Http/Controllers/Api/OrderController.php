@@ -33,6 +33,9 @@ class OrderController extends Controller
 
         $orders = Order::query()
             ->where('user_id', $request->user()->id)
+            ->with([
+                'deliveryDriver:id,name,delivery_phone',
+            ])
             ->withCount('items')
             ->latest('id')
             ->paginate($perPage);
@@ -54,6 +57,18 @@ class OrderController extends Controller
                         (float) $order->tax_amount,
                     'total' => (float) $order->total,
                     'currency' => $order->currency,
+                    'delivery_driver' =>
+                        $order->deliveryDriver
+                            ? [
+                                'id' =>
+                                    $order->deliveryDriver->id,
+                                'name' =>
+                                    $order->deliveryDriver->name,
+                                'phone' =>
+                                    $order->deliveryDriver
+                                        ->delivery_phone,
+                            ]
+                            : null,
                     'created_at' => $order->created_at
                         ?->toIso8601String(),
                 ]
@@ -425,6 +440,7 @@ class OrderController extends Controller
 
         $order->load([
             'items.product',
+            'deliveryDriver:id,name,delivery_phone',
         ]);
 
         $user->notify(
@@ -462,6 +478,7 @@ class OrderController extends Controller
             )
             ->with([
                 'items.product',
+                'deliveryDriver:id,name,delivery_phone',
             ])
             ->first();
 
@@ -585,6 +602,7 @@ class OrderController extends Controller
 
         $order->load([
             'items.product',
+            'deliveryDriver:id,name,delivery_phone',
         ]);
 
         return response()->json([
@@ -874,6 +892,21 @@ class OrderController extends Controller
 
             'order_number' =>
                 $order->order_number,
+
+            'delivery_driver' =>
+                $order->deliveryDriver
+                    ? [
+                        'id' =>
+                            $order->deliveryDriver->id,
+
+                        'name' =>
+                            $order->deliveryDriver->name,
+
+                        'phone' =>
+                            $order->deliveryDriver
+                                ->delivery_phone,
+                    ]
+                    : null,
 
             'customer' => [
                 'address_id' =>

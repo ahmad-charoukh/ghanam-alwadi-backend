@@ -7,6 +7,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
 
@@ -115,6 +116,7 @@ class UserForm
                             ),
 
                         Toggle::make('is_delivery_driver')
+                            ->live()
                             ->label('حساب مندوب توصيل')
                             ->default(false)
                             ->inline(false)
@@ -122,6 +124,23 @@ class UserForm
                                 'فعّل هذا الخيار ليتمكن المستخدم من استلام الطلبات والدخول إلى لوحة المندوب.'
                             )
                             ->dehydrated(),
+                        TextInput::make('delivery_phone')
+                            ->label('رقم جوال المندوب')
+                            ->placeholder('05xxxxxxxx')
+                            ->tel()
+                            ->required(
+                                fn (Get $get): bool =>
+                                    (bool) $get('is_delivery_driver')
+                            )
+                            ->visible(
+                                fn (Get $get): bool =>
+                                    (bool) $get('is_delivery_driver')
+                            )
+                            ->maxLength(30)
+                            ->prefixIcon('heroicon-m-phone')
+                            ->helperText(
+                                'سيظهر هذا الرقم للعميل بعد تحويل الطلب إلى المندوب.'
+                            ),
                         DateTimePicker::make(
                             'email_verified_at'
                         )
