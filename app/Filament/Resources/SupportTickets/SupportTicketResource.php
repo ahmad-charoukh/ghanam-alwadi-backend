@@ -55,19 +55,17 @@ class SupportTicketResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         return (string) SupportTicket::query()
-            ->where('status', SupportTicket::STATUS_NEW)
+            ->where('status', 'new')
             ->count();
     }
 
     public static function getNavigationBadgeColor(): ?string
     {
         $newTickets = SupportTicket::query()
-            ->where('status', SupportTicket::STATUS_NEW)
+            ->where('status', 'new')
             ->count();
 
-        return $newTickets > 0
-            ? 'warning'
-            : 'success';
+        return $newTickets > 0 ? 'warning' : 'success';
     }
 
     public static function getNavigationBadgeTooltip(): ?string
