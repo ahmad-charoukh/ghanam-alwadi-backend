@@ -19,6 +19,8 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        'is_admin',
+        'is_delivery_driver',
     ];
 
     protected $hidden = [
@@ -32,6 +34,7 @@ class User extends Authenticatable implements FilamentUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'is_delivery_driver' => 'boolean',
         ];
     }
 
@@ -42,7 +45,11 @@ class User extends Authenticatable implements FilamentUser
     public function canAccessPanel(
         Panel $panel
     ): bool {
-        return $this->is_admin === true;
+        return match ($panel->getId()) {
+            'admin' => $this->is_admin === true,
+            'delivery' => $this->is_delivery_driver === true,
+            default => false,
+        };
     }
 
     /**
@@ -119,6 +126,16 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(
             SupportMessage::class,
             'sender_id'
+        );
+    }
+    /**
+     * الطلبات المعيّنة لهذا المندوب.
+     */
+    public function assignedDeliveryOrders(): HasMany
+    {
+        return $this->hasMany(
+            Order::class,
+            'delivery_driver_id'
         );
     }
 }

@@ -114,6 +114,14 @@ class UserForm
                                 }
                             ),
 
+                        Toggle::make('is_delivery_driver')
+                            ->label('حساب مندوب توصيل')
+                            ->default(false)
+                            ->inline(false)
+                            ->helperText(
+                                'فعّل هذا الخيار ليتمكن المستخدم من استلام الطلبات والدخول إلى لوحة المندوب.'
+                            )
+                            ->dehydrated(),
                         DateTimePicker::make(
                             'email_verified_at'
                         )

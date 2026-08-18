@@ -10,6 +10,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class OrdersTable
 {
@@ -45,6 +46,19 @@ class OrdersTable
                     ->badge()
                     ->color('gray'),
 
+                TextColumn::make('deliveryDriver.name')
+                    ->label('المندوب')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->placeholder('غير معيّن')
+                    ->color(
+                        fn (?string $state): string =>
+                            filled($state)
+                                ? 'info'
+                                : 'gray',
+                    )
+                    ->icon('heroicon-m-truck'),
                 TextColumn::make('total')
                     ->label('إجمالي الطلب')
                     ->money('SAR')
@@ -59,7 +73,7 @@ class OrdersTable
                         fn (?string $state): string => match ($state) {
                             'new' => 'طلب جديد',
                             'confirmed' => 'تم التأكيد',
-                            'preparing' => 'قيد التجهيز',
+                            'processing' => 'قيد التجهيز',
                             'shipped' => 'خرج للتوصيل',
                             'delivered' => 'تم التسليم',
                             'cancelled' => 'ملغي',
@@ -70,7 +84,7 @@ class OrdersTable
                         fn (?string $state): string => match ($state) {
                             'new' => 'danger',
                             'confirmed' => 'info',
-                            'preparing' => 'warning',
+                            'processing' => 'warning',
                             'shipped' => 'primary',
                             'delivered' => 'success',
                             'cancelled' => 'gray',
@@ -159,7 +173,7 @@ class OrdersTable
                     ->options([
                         'new' => 'طلب جديد',
                         'confirmed' => 'تم التأكيد',
-                        'preparing' => 'قيد التجهيز',
+                        'processing' => 'قيد التجهيز',
                         'shipped' => 'خرج للتوصيل',
                         'delivered' => 'تم التسليم',
                         'cancelled' => 'ملغي',
@@ -184,6 +198,20 @@ class OrdersTable
                         'online' => 'دفع إلكتروني',
                     ]),
 
+                SelectFilter::make('deliveryDriver')
+                    ->label('المندوب')
+                    ->relationship(
+                        name: 'deliveryDriver',
+                        titleAttribute: 'name',
+                        modifyQueryUsing:
+                            fn (Builder $query): Builder =>
+                                $query->where(
+                                    'is_delivery_driver',
+                                    true
+                                ),
+                    )
+                    ->searchable()
+                    ->preload(),
                 SelectFilter::make('city')
                     ->label('المدينة')
                     ->options(

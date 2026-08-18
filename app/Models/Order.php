@@ -31,6 +31,7 @@ class Order extends Model
         'user_id',
         'address_id',
         'coupon_id',
+        'delivery_driver_id',
         'order_number',
         'customer_name',
         'customer_email',
@@ -50,10 +51,12 @@ class Order extends Model
         'status',
         'customer_notes',
         'admin_notes',
+        'delivery_notes',
         'confirmed_at',
         'shipped_at',
         'delivered_at',
         'cancelled_at',
+        'assigned_at',
     ];
 
     protected function casts(): array
@@ -62,6 +65,7 @@ class Order extends Model
             'user_id' => 'integer',
             'address_id' => 'integer',
             'coupon_id' => 'integer',
+            'delivery_driver_id' => 'integer',
             'subtotal' => 'decimal:2',
             'delivery_fee' => 'decimal:2',
             'discount' => 'decimal:2',
@@ -72,11 +76,24 @@ class Order extends Model
             'shipped_at' => 'datetime',
             'delivered_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'assigned_at' => 'datetime',
         ];
     }
 
     protected static function booted(): void
     {
+        /*
+         * تسجيل وقت تعيين المندوب تلقائيًا.
+         */
+        static::updating(function (Order $order): void {
+            if (! $order->isDirty('delivery_driver_id')) {
+                return;
+            }
+
+            $order->assigned_at = $order->delivery_driver_id
+                ? now()
+                : null;
+        });
         /*
          * إنشاء رقم طلب فريد تلقائيًا.
          */
@@ -212,6 +229,16 @@ class Order extends Model
         return $this->hasMany(
             OrderItem::class,
             'order_id'
+        );
+    }
+    /**
+     * المندوب المعيّن لتوصيل الطلب.
+     */
+    public function deliveryDriver(): BelongsTo
+    {
+        return $this->belongsTo(
+            User::class,
+            'delivery_driver_id'
         );
     }
 }

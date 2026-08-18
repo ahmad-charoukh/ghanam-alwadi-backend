@@ -33,7 +33,7 @@ class OrderInfolist
                                 fn (?string $state): string => match ($state) {
                                     'new' => 'طلب جديد',
                                     'confirmed' => 'تم تأكيد الطلب',
-                                    'preparing' => 'قيد التجهيز',
+                                    'processing' => 'قيد التجهيز',
                                     'shipped' => 'خرج للتوصيل',
                                     'delivered' => 'تم التسليم',
                                     'cancelled' => 'طلب ملغي',
@@ -44,7 +44,7 @@ class OrderInfolist
                                 fn (?string $state): string => match ($state) {
                                     'new' => 'danger',
                                     'confirmed' => 'info',
-                                    'preparing' => 'warning',
+                                    'processing' => 'warning',
                                     'shipped' => 'primary',
                                     'delivered' => 'success',
                                     'cancelled' => 'gray',
@@ -149,6 +149,37 @@ class OrderInfolist
                     ])
                     ->columns(3),
 
+                Section::make('إدارة التوصيل')
+                    ->description(
+                        'المندوب المسؤول ومعلومات تسليم الطلب.'
+                    )
+                    ->icon('heroicon-o-truck')
+                    ->schema([
+                        TextEntry::make('deliveryDriver.name')
+                            ->label('المندوب المسؤول')
+                            ->placeholder('لم يتم تعيين مندوب')
+                            ->badge()
+                            ->color('info')
+                            ->icon('heroicon-m-user-circle'),
+
+                        TextEntry::make('deliveryDriver.email')
+                            ->label('بريد المندوب')
+                            ->placeholder('غير متوفر')
+                            ->copyable()
+                            ->icon('heroicon-m-envelope'),
+
+                        TextEntry::make('assigned_at')
+                            ->label('وقت تعيين المندوب')
+                            ->dateTime('Y-m-d H:i')
+                            ->placeholder('لم يتم التعيين بعد')
+                            ->icon('heroicon-m-clock'),
+
+                        TextEntry::make('delivery_notes')
+                            ->label('ملاحظات المندوب')
+                            ->placeholder('لا توجد ملاحظات للمندوب')
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2),
                 Section::make('ملاحظات الطلب')
                     ->schema([
                         TextEntry::make('customer_notes')

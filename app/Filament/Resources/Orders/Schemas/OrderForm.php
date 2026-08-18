@@ -10,6 +10,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 class OrderForm
 {
@@ -172,7 +173,7 @@ class OrderForm
                             ->options([
                                 'new' => 'طلب جديد',
                                 'confirmed' => 'تم تأكيد الطلب',
-                                'preparing' => 'قيد التجهيز',
+                                'processing' => 'قيد التجهيز',
                                 'shipped' => 'خرج للتوصيل',
                                 'delivered' => 'تم التسليم',
                                 'cancelled' => 'طلب ملغي',
@@ -197,6 +198,59 @@ class OrderForm
                     ])
                     ->columns(3),
 
+                Section::make('إدارة التوصيل')
+                    ->description(
+                        'عيّن الطلب لمندوب توصيل وحدد الملاحظات الخاصة به.'
+                    )
+                    ->icon('heroicon-o-truck')
+                    ->schema([
+                        Select::make('delivery_driver_id')
+                            ->label('المندوب المسؤول')
+                            ->relationship(
+                                name: 'deliveryDriver',
+                                titleAttribute: 'name',
+                                modifyQueryUsing:
+                                    fn (Builder $query): Builder =>
+                                        $query->where(
+                                            'is_delivery_driver',
+                                            true
+                                        ),
+                            )
+                            ->searchable([
+                                'name',
+                                'email',
+                            ])
+                            ->preload()
+                            ->native(false)
+                            ->placeholder(
+                                'لم يتم تعيين مندوب'
+                            )
+                            ->noOptionsMessage(
+                                'لا توجد حسابات مندوبي توصيل'
+                            )
+                            ->helperText(
+                                'يظهر هنا فقط المستخدمون المفعّل لهم خيار حساب مندوب توصيل.'
+                            ),
+
+                        DateTimePicker::make('assigned_at')
+                            ->label('وقت تعيين المندوب')
+                            ->native(false)
+                            ->seconds(false)
+                            ->readOnly()
+                            ->helperText(
+                                'يتم تسجيله تلقائيًا عند تعيين المندوب.'
+                            ),
+
+                        Textarea::make('delivery_notes')
+                            ->label('ملاحظات للمندوب')
+                            ->placeholder(
+                                'مثال: التواصل مع العميل قبل الوصول...'
+                            )
+                            ->rows(3)
+                            ->maxLength(2000)
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2),
                 Section::make('ملاحظات الطلب')
                     ->schema([
                         Textarea::make('customer_notes')
@@ -272,7 +326,7 @@ class OrderForm
                 $set('cancelled_at', null);
                 break;
 
-            case 'preparing':
+            case 'processing':
                 if (blank($get('confirmed_at'))) {
                     $set('confirmed_at', $now);
                 }
