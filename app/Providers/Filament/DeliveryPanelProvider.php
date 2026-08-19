@@ -27,6 +27,8 @@ class DeliveryPanelProvider extends PanelProvider
             ->id('delivery')
             ->path('delivery')
             ->login()
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('10s')
             ->brandName('غنم الوادي - لوحة المندوب')
             ->colors([
                 'primary' => Color::Amber,
